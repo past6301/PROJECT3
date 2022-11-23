@@ -7,7 +7,7 @@ let express = require('express');
 let sqlite3 = require('sqlite3');
 
 
-let db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
+let db_filename = path.join(__dirname, 'db', 'stpaul_crime_copy.sqlite3');
 
 let app = express();
 let port = 8000;
@@ -28,8 +28,21 @@ let db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
 // GET request handler for crime codes
 app.get('/codes', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
+    let sql = "SELECT * FROM Codes";
     
-    res.status(200).type('json').send({}); // <-- you will need to change this
+    db.all(sql, [], (err, rows) => {
+        var mydata = []; //once this was inside the db method, the assignment became synchcronous
+        if (err) {
+          throw err;
+        }
+        rows.forEach((row) => {
+          console.log(row.code);
+          mydata.push(row);
+        });
+        res.status(200).type('json').send(mydata); 
+        //this returns the response inside the db method
+        //so that the data is synchronized
+      });
 });
 
 // GET request handler for neighborhoods
@@ -49,14 +62,20 @@ app.get('/incidents', (req, res) => {
 // PUT request handler for new crime incident
 app.put('/new-incident', (req, res) => {
     console.log(req.body); // uploaded data
-    
+  
+    // insert one row into the langs table
+    //db.run(`INSERT INTO langs(name) VALUES(?)`, ['C'], function(err) {
+    //https://www.sqlitetutorial.net/sqlite-nodejs/insert/
     res.status(200).type('txt').send('OK'); // <-- you may need to change this
 });
 
 // DELETE request handler for new crime incident
-app.delete('/remove-incident', (req, res) => {
+app.delete('/new-incident', (req, res) => {
     console.log(req.body); // uploaded data
-    
+    /*
+    sqlDB.run("DELETE FROM Table23 WHERE id=(?)", id_1, function(err)
+    https://stackoverflow.com/questions/35008591/sqlite-select-and-delete
+    */
     res.status(200).type('txt').send('OK'); // <-- you may need to change this
 });
 
