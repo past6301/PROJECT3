@@ -28,7 +28,7 @@ let db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
 // GET request handler for crime codes
 app.get('/codes', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
-    let sql = "SELECT * FROM Codes";
+    let sql = "SELECT * FROM Codes ORDER BY code";
     
     db.all(sql, [], (err, rows) => {
         var mydata = []; //once this was inside the db method, the assignment became synchcronous
@@ -48,14 +48,42 @@ app.get('/codes', (req, res) => {
 // GET request handler for neighborhoods
 app.get('/neighborhoods', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
+    let sql = "SELECT * FROM Neighborhoods ORDER BY neighborhood_number";
     
+    db.all(sql, [], (err, rows) => {
+        var mydata = []; //once this was inside the db method, the assignment became synchcronous
+        if (err) {
+          throw err;
+        }
+        rows.forEach((row) => {
+          console.log(row.neighborhood_number);
+          mydata.push(row);
+        });
+        res.status(200).type('json').send(mydata); 
+        //this returns the response inside the db method
+        //so that the data is synchronized
+      });
     res.status(200).type('json').send({}); // <-- you will need to change this
 });
 
 // GET request handler for crime incidents
 app.get('/incidents', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
+    let sql = "SELECT * FROM Incidents ORDER BY date_time";
     
+    db.all(sql, [], (err, rows) => {
+        var mydata = []; //once this was inside the db method, the assignment became synchcronous
+        if (err) {
+          throw err;
+        }
+        rows.forEach((row) => {
+          console.log(row.date_time);
+          mydata.push(row);
+        });
+        res.status(200).type('json').send(mydata); 
+        //this returns the response inside the db method
+        //so that the data is synchronized
+      });
     res.status(200).type('json').send({}); // <-- you will need to change this
 });
 
