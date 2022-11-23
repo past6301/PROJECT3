@@ -7,7 +7,7 @@ let express = require('express');
 let sqlite3 = require('sqlite3');
 
 
-let db_filename = path.join(__dirname, 'db', 'stpaul_crime_copy.sqlite3');
+let db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
 
 let app = express();
 let port = 8000;
@@ -63,7 +63,6 @@ app.get('/neighborhoods', (req, res) => {
         //this returns the response inside the db method
         //so that the data is synchronized
       });
-    res.status(200).type('json').send({}); // <-- you will need to change this
 });
 
 // GET request handler for crime incidents
@@ -84,7 +83,6 @@ app.get('/incidents', (req, res) => {
         //this returns the response inside the db method
         //so that the data is synchronized
       });
-    res.status(200).type('json').send({}); // <-- you will need to change this
 });
 
 // PUT request handler for new crime incident
