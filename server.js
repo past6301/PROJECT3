@@ -28,28 +28,36 @@ let db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
 // GET request handler for crime codes
 app.get('/codes', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
-    let sql = "SELECT * FROM Codes ORDER BY code";
-    
-    db.all(sql, [], (err, rows) => {
+    console.log(Object.keys(req.query).length);
+    let query = "SELECT * FROM Codes ORDER BY code";
+    if(Object.keys(req.query).length !== 0){
+        query = "SELECT * FROM Codes WHERE code IN (?) ORDER BY code";
+    }
+    query = query.replace("?", req.query.code);
+    console.log(query);
+    db.all(query, [], (err, rows) => {
         var mydata = []; //once this was inside the db method, the assignment became synchcronous
         if (err) {
-          throw err;
+            throw err;
         }
         rows.forEach((row) => {
-          console.log(row.code);
-          mydata.push(row);
+            console.log(row.code);
+            mydata.push(row);
         });
         res.status(200).type('json').send(mydata); 
-        //this returns the response inside the db method
-        //so that the data is synchronized
-      });
+            //this returns the response inside the db method
+            //so that the data is synchronized
+    });
 });
 
 // GET request handler for neighborhoods
 app.get('/neighborhoods', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
     let sql = "SELECT * FROM Neighborhoods ORDER BY neighborhood_number";
-    
+    if(Object.keys(req.query).length !== 0){
+        sql = "SELECT * FROM Neighborhoods WHERE neighborhood_number IN (?) ORDER BY neighborhood_number";
+    }
+    sql = sql.replace("?", req.query.neighborhood_number);
     db.all(sql, [], (err, rows) => {
         var mydata = []; //once this was inside the db method, the assignment became synchcronous
         if (err) {
