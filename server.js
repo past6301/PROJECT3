@@ -68,7 +68,7 @@ app.get('/neighborhoods', (req, res) => {
 // GET request handler for crime incidents
 app.get('/incidents', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
-    let sql = "SELECT * FROM Incidents ORDER BY date_time";
+    let sql = "SELECT case_number, date() as date, time() as time, code, incident, police_grid, neighborhood_number, block FROM Incidents ORDER BY date_time";
     
     db.all(sql, [], (err, rows) => {
         var mydata = []; //once this was inside the db method, the assignment became synchcronous
@@ -76,7 +76,7 @@ app.get('/incidents', (req, res) => {
           throw err;
         }
         rows.forEach((row) => {
-          console.log(row.date_time);
+          console.log(row.date);
           mydata.push(row);
         });
         res.status(200).type('json').send(mydata); 
