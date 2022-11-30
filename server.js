@@ -76,7 +76,18 @@ app.get('/neighborhoods', (req, res) => {
 // GET request handler for crime incidents
 app.get('/incidents', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
-    let sql = "SELECT case_number, date() as date, time() as time, code, incident, police_grid, neighborhood_number, block FROM Incidents ORDER BY date_time";
+    let sql = "SELECT case_number, date() as date, time() as time, code, incident, police_grid, neighborhood_number, block FROM Incidents ORDER BY date_time LIMIT 1000";
+    if(Object.keys(req.query).length !== 0){
+        sql = "SELECT case_number, date() as date, time() as time, code, incident, police_grid, neighborhood_number, block FROM Incidents";
+        let k;
+        for(k in req.query){
+            if(k == 'code'){
+                sql = sql + " WHERE code IN (?)"
+                sql = sql.replace("?", req.query.code);
+            }
+        }
+        sql = sql + " ORDER BY date_time LIMIT 10"
+    }
     
     db.all(sql, [], (err, rows) => {
         var mydata = []; //once this was inside the db method, the assignment became synchcronous
