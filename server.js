@@ -35,9 +35,10 @@ app.get('/codes', (req, res) => {
     let p = [];
     if(Object.keys(req.query).length !== 0){
         query = "SELECT * FROM Codes WHERE code IN (?) ORDER BY code";
-        p.push(req.query.code);
+        p[0] = req.query.code;
     }
     console.log(query);
+    console.log();
     db.all(query, p, (err, rows) => {
         var mydata = []; //once this was inside the db method, the assignment became synchcronous
         if (err) {
@@ -57,11 +58,12 @@ app.get('/codes', (req, res) => {
 app.get('/neighborhoods', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
     let sql = "SELECT * FROM Neighborhoods ORDER BY neighborhood_number";
+    let p = [];
     if(Object.keys(req.query).length !== 0){
         sql = "SELECT * FROM Neighborhoods WHERE neighborhood_number IN (?) ORDER BY neighborhood_number";
+        p[0] = req.query.neighborhood_number;
     }
-    sql = sql.replace("?", req.query.neighborhood_number);
-    db.all(sql, [], (err, rows) => {
+    db.all(sql, p, (err, rows) => {
         var mydata = []; //once this was inside the db method, the assignment became synchcronous
         if (err) {
           throw err;
@@ -84,31 +86,76 @@ app.get('/incidents', (req, res) => {
     if(Object.keys(req.query).length !== 0){
         sql = "SELECT case_number, date(date_time) as date, time(date_time) as time, code, incident, police_grid, neighborhood_number, block FROM Incidents";
         let k;
+        let i = 0;
+        let j = 0;
+        let and = ' AND';
+        let where = ' WHERE';
         for(k in req.query){
             if(k == 'code'){
-                sql = sql + " WHERE code IN (?)";
+                if(i==0){
+                    sql = sql + where;
+                }
+                else{
+                    sql = sql + and;
+                }
+                sql = sql + " code IN (?)";
                 p.push(req.query.code);
+                i = i + 1;
             }
             else if(k == 'start_date'){
-                sql = sql + " WHERE date > ?";
+                if(i==0){
+                    sql = sql + where;
+                }
+                else{
+                    sql = sql + and;
+                }
+                sql = sql + " date > ?";
                 p.push(req.query.start_date);
+                i = i + 1;
             }
             else if(k == 'end_date'){
+                if(i==0){
+                    sql = sql + where;
+                }
+                else{
+                    sql = sql + and;
+                }
                 sql = sql + " WHERE date < ?";
                 p.push(req.query.end_date);
+                i = i + 1;
             }
             else if(k == 'grid'){
+                if(i==0){
+                    sql = sql + where;
+                }
+                else{
+                    sql = sql + and;
+                }
                 sql = sql + " WHERE police_grid IN (?)";
                 p.push(req.query.grid);
+                i = i + 1;
             }
             else if(k == 'neighborhood'){
-                n = true;
+                if(i==0){
+                    sql = sql + where;
+                }
+                else{
+                    sql = sql + and;
+                }
+                sql = sql + " WHERE police_grid IN (?)";
+                p.push(req.query.grid);
+                i = i + 1;
             }
             else if(k == 'limit'){
-                l = true;
+                sql = sql + "ORDER BY date LIMIT (?)"; 
+                p.push(req.query.limit); 
+                i = i + 1;
+                j = j + 1;
             }
         }
-        sql = sql + " LIMIT 100";
+        if(j == 0){
+            sql = sql + "ORDER BY date LIMIT 1000";
+        }
     }
     
     db.all(sql, p, (err, rows) => {
@@ -138,26 +185,35 @@ app.put('/new-incident', (req, res) => {
     //    INSERT INTO Incidents(case_number TEXT, date_time DATETIME, code INTEGER, incident TEXT, police_grid INTEGER, neighborhood_number INTEGER, block TEXT) \
     //    VALUES (?);\
     //END";
-
-    let sql = "INSERT INTO Incidents(case_number TEXT, date_time DATETIME, code INTEGER, incident TEXT, police_grid INTEGER, neighborhood_number INTEGER, block TEXT) \
-    VALUES (?)";
-    databaseRun(sql, req.body);
-    res.status(200).type('txt').send('OK'); // <-- you may need to change this
+    let params;
+    let sql = "INSERT INTO Incidents VALUES (?, ?, ?, ?, ?, ?, ?)";
+    let date_time = req.body.date + "T" + req.body.time;
+    params = [req.body.case_number, date_time, req.body.code, req.body.incident, req.body.police_grid, req.body.neighborhood_number, req.body.block];
+    databaseRun(sql, params)
+    .then(() => {
+        res.status(200).type('txt').send('OK');
+    })
+    .catch((err) => {
+        res.status(500).type('txt').send('NOT OK')
+    })
+    // <-- you may need to change this
 });
 
 // DELETE request handler for new crime incident
-app.delete('/new-incident', (req, res) => {
+app.delete('/delete-incident', (req, res) => {
     console.log(req.body); // uploaded data
     /*
     sqlDB.run("DELETE FROM Table23 WHERE id=(?)", id_1, function(err)
     https://stackoverflow.com/questions/35008591/sqlite-select-and-delete
     */
     let sql = "DELETE FROM Incidents WHERE case_number = (?)";
-    db.run(sql, (err) =>{
-        return console.log(err.message);
-    });
-
-    res.status(200).type('txt').send('OK'); // <-- you may need to change this
+    databaseRun(sql, req.body.case_number)
+    .then(() => {
+        res.status(200).type('txt').send('OK');
+    })
+    .catch((err) => {
+        res.status(500).type('txt').send('NOT OK')
+    })
 });
 
 
