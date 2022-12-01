@@ -3,17 +3,17 @@
     "version": "0.0.0",
     "description": "RESTful API Server using Node JS",
     "author": {
-        "name": "",
-        "email": ""
+        "name": "Matthew Pastrana",
+        "email": "past6301@stthomas.edu"
     },
     "contributors": [
         {
-            "name": "",
-            "email": ""
+            "name": "Andy Phan",
+            "email": "phan6369@stthomas.edu"
         },
         {
-            "name": "",
-            "email": ""
+            "name": "Karen Vuong",
+            "email": "vuon7009@stthomas.edu"
         }
     ],
     "main": "server.js",

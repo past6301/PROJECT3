@@ -30,12 +30,13 @@ app.get('/codes', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
     console.log(Object.keys(req.query).length);
     let query = "SELECT * FROM Codes ORDER BY code";
+    let p = [];
     if(Object.keys(req.query).length !== 0){
         query = "SELECT * FROM Codes WHERE code IN (?) ORDER BY code";
+        p.push(req.query.code);
     }
-    query = query.replace("?", req.query.code);
     console.log(query);
-    db.all(query, [], (err, rows) => {
+    db.all(query, p, (err, rows) => {
         var mydata = []; //once this was inside the db method, the assignment became synchcronous
         if (err) {
             throw err;
@@ -76,20 +77,39 @@ app.get('/neighborhoods', (req, res) => {
 // GET request handler for crime incidents
 app.get('/incidents', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
-    let sql = "SELECT case_number, date() as date, time() as time, code, incident, police_grid, neighborhood_number, block FROM Incidents ORDER BY date_time LIMIT 1000";
+    let sql = "SELECT case_number, date(date_time) as date, time(date_time) as time, code, incident, police_grid, neighborhood_number, block FROM Incidents ORDER BY date_time LIMIT 1000";
+    let p = [];
     if(Object.keys(req.query).length !== 0){
-        sql = "SELECT case_number, date() as date, time() as time, code, incident, police_grid, neighborhood_number, block FROM Incidents";
+        sql = "SELECT case_number, date(date_time) as date, time(date_time) as time, code, incident, police_grid, neighborhood_number, block FROM Incidents";
         let k;
         for(k in req.query){
             if(k == 'code'){
-                sql = sql + " WHERE code IN (?)"
-                sql = sql.replace("?", req.query.code);
+                sql = sql + " WHERE code IN (?)";
+                p.push(req.query.code);
+            }
+            else if(k == 'start_date'){
+                sql = sql + " WHERE date > ?";
+                p.push(req.query.start_date);
+            }
+            else if(k == 'end_date'){
+                sql = sql + " WHERE date < ?";
+                p.push(req.query.end_date);
+            }
+            else if(k == 'grid'){
+                sql = sql + " WHERE police_grid IN (?)";
+                p.push(req.query.grid);
+            }
+            else if(k == 'neighborhood'){
+                n = true;
+            }
+            else if(k == 'limit'){
+                l = true;
             }
         }
-        sql = sql + " ORDER BY date_time LIMIT 10"
+        sql = sql + " LIMIT 100";
     }
     
-    db.all(sql, [], (err, rows) => {
+    db.all(sql, p, (err, rows) => {
         var mydata = []; //once this was inside the db method, the assignment became synchcronous
         if (err) {
           throw err;
