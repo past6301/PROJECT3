@@ -176,15 +176,6 @@ app.get('/incidents', (req, res) => {
 // PUT request handler for new crime incident
 app.put('/new-incident', (req, res) => {
     console.log(req.body); // uploaded data
-  
-    // insert one row into the langs table
-    //db.run(`INSERT INTO langs(name) VALUES(?)`, ['C'], function(err) {
-    //https://www.sqlitetutorial.net/sqlite-nodejs/insert/
-    //let sql = "IF NOT EXISTS (SELECT * FROM INCIDENTS WHERE case_number = '')\
-    //BEGIN\
-    //    INSERT INTO Incidents(case_number TEXT, date_time DATETIME, code INTEGER, incident TEXT, police_grid INTEGER, neighborhood_number INTEGER, block TEXT) \
-    //    VALUES (?);\
-    //END";
     let params;
     let sql = "INSERT INTO Incidents VALUES (?, ?, ?, ?, ?, ?, ?)";
     let date_time = req.body.date + "T" + req.body.time;
@@ -202,10 +193,6 @@ app.put('/new-incident', (req, res) => {
 // DELETE request handler for new crime incident
 app.delete('/delete-incident', (req, res) => {
     console.log(req.body); // uploaded data
-    /*
-    sqlDB.run("DELETE FROM Table23 WHERE id=(?)", id_1, function(err)
-    https://stackoverflow.com/questions/35008591/sqlite-select-and-delete
-    */
     let sql = "DELETE FROM Incidents WHERE case_number = (?)";
     databaseRun(sql, req.body.case_number)
     .then(() => {
