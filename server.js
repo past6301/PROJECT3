@@ -12,7 +12,7 @@ let db_filename = path.join(__dirname, 'db', 'stpaul_crime.sqlite3');
 let app = express();
 let cors = require('cors');
 app.use(cors());
-let port = 8000;
+let port = 8080;
 
 app.use(express.json());
 
@@ -81,7 +81,7 @@ app.get('/neighborhoods', (req, res) => {
 // GET request handler for crime incidents
 app.get('/incidents', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
-    let sql = "SELECT case_number, date(date_time) as date, time(date_time) as time, code, incident, police_grid, neighborhood_number, block FROM Incidents ORDER BY date_time LIMIT 1000";
+    let sql = "SELECT case_number, date(date_time) as date, time(date_time) as time, code, incident, police_grid, neighborhood_number, block FROM Incidents ORDER BY date_time DESC LIMIT 1000";
     let p = [];
     if(Object.keys(req.query).length !== 0){
         sql = "SELECT case_number, date(date_time) as date, time(date_time) as time, code, incident, police_grid, neighborhood_number, block FROM Incidents";
@@ -147,14 +147,14 @@ app.get('/incidents', (req, res) => {
                 i = i + 1;
             }
             else if(k == 'limit'){
-                sql = sql + "ORDER BY date LIMIT (?)"; 
+                sql = sql + "ORDER BY date DESC LIMIT (?)"; 
                 p.push(req.query.limit); 
                 i = i + 1;
                 j = j + 1;
             }
         }
         if(j == 0){
-            sql = sql + "ORDER BY date LIMIT 1000";
+            sql = sql + "ORDER BY date DESC LIMIT 1000";
         }
     }
     
