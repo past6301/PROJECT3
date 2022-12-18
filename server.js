@@ -220,12 +220,22 @@ app.put('/new-incident', (req, res) => {
 
 // DELETE request handler for new crime incident
 app.delete('/remove-incident', (req, res) => {
-    console.log(req.body); // uploaded data
-    databaseSelect("SELECT * from Incidents WHERE case_number = (?)", (err, res)=>{
+    console.log("Deleting this" + req.body.code); // uploaded data
+     let sql = "DELETE FROM Incidents WHERE case_number = (?)";
+    databaseRun(sql, req.body.code)
+    .then(() => {
+        res.status(200).type('txt').send('OK');
+    })
+    .catch((err) => {
+        res.status(500).type('txt').send('NOT OK')
+    })
+    /*
+    databaseSelect("SELECT * from Incidents WHERE case_number = (?)", (res, err)=>{
         if (err) {
             //TODO:  handle error
         } else {
             if (res) {
+                console.log("HERE");
                 let sql = "DELETE FROM Incidents WHERE case_number = (?)";
                 databaseRun(sql, req.body.case_number).then(() => {
                     res.status(200).type('txt').send('OK');
@@ -239,6 +249,7 @@ app.delete('/remove-incident', (req, res) => {
             }
         }
     });
+    */
 });
 
 
