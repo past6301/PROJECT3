@@ -164,13 +164,13 @@ app.get('/incidents', (req, res) => {
             }
             else if(k == 'neighborhood'){
                 if(i==0){
-                    sql += where;
+                    sql = sql + where;
                 }
                 else{
-                    sql += and;
+                    sql = sql + and;
                 }
-                sql = sql + " neighborhood_number IN (?)";
-                p.push(extractListFromQueryParam(req.query.neighborhood_number));
+                sql = sql + " Incidents.neighborhood_number IN (?)";
+                p.push(req.query.neighborhood_number);
                 i++;
             }
             else if(k == 'limit') {
@@ -189,7 +189,8 @@ app.get('/incidents', (req, res) => {
     db.all(sql, p, (err, rows) => {
         var mydata = []; //once this was inside the db method, the assignment became synchcronous
         if (err) {
-            rs.status(500).type('json').send({ error: 'INTERNAL SERVER ERROR'})
+            //rs.status(500).type('json').send({ error: 'INTERNAL SERVER ERROR'})
+            throw err;
         }
         rows.forEach((row) => {
             console.log(row.date);
