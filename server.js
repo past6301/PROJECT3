@@ -106,7 +106,7 @@ function extractListFromQueryParam(val) {
 // GET request handler for crime incidents
 app.get('/incidents', (req, res) => {
     console.log(req.query); // query object (key-value pairs after the ? in the url)
-    let sql = "SELECT case_number, date(date_time) as date, time(date_time) as time, code, incident, police_grid, Incidents.neighborhood_number, Neighborhoods.neighborhood_name, block FROM Incidents INNER JOIN Neighborhoods ON Incidents.neighborhood_number = Neighborhoods.neighborhood_number ORDER BY date_time DESC LIMIT 1000";
+    let sql;
     let p = [];
     if(Object.keys(req.query).length !== 0){
         sql = "SELECT case_number, date(date_time) as date, time(date_time) as time, code, incident, police_grid, Incidents.neighborhood_number, Neighborhoods.neighborhood_name, block FROM Incidents INNER JOIN Neighborhoods ON Incidents.neighborhood_number = Neighborhoods.neighborhood_number";
@@ -183,7 +183,11 @@ app.get('/incidents', (req, res) => {
             if(j == 0){
                 sql = sql + " ORDER BY date DESC LIMIT 1000";
             }
+            console.log(sql);
         }
+    }
+    else{
+        sql = "SELECT case_number, date(date_time) as date, time(date_time) as time, code, incident, police_grid, Incidents.neighborhood_number, Neighborhoods.neighborhood_name, block FROM Incidents INNER JOIN Neighborhoods ON Incidents.neighborhood_number = Neighborhoods.neighborhood_number ORDER BY date_time DESC LIMIT 1000";
     }
         
     db.all(sql, p, (err, rows) => {
