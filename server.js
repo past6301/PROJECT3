@@ -29,9 +29,11 @@ let db = new sqlite3.Database(db_filename, sqlite3.OPEN_READWRITE, (err) => {
 
 // TODO: change this to a GET:// with a URL encoded parameter, maybe
 app.post('/lookup', async (req, res) => {
-    const address = req.body.address;
+    try{
+        const address = req.body.address;
     if (!address) {
         res.status(400).type('json').send({error: 'Validation Error: address is required'});
+        return;
     }
 
     console.log('Looking up the address for ',address)
@@ -41,11 +43,17 @@ app.post('/lookup', async (req, res) => {
             ['content-type']: 'application/json'
         }
     });
+
     const data = await response.json()
     console.log('Got the response', data)
     res.status(200).type('json').send(data);
-});
 
+}catch (error){
+    res.status(500).type('json').send({error})
+}
+
+});
+    
 
 // GET request handler for crime codes
 app.get('/codes', (req, res) => {
